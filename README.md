@@ -21,4 +21,5 @@ You just need to enter your phone number or paste your contacts into the "check-
 
 
 - [ ] Scan QR using your phone, run automatically your list and results will appear
+
 ![Screenshot](https://user-images.githubusercontent.com/3745442/129669674-b924db39-0ec6-4556-bc84-581a2a926666.png)
