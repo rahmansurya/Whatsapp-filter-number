@@ -14,6 +14,7 @@ You just need to enter your phone number or paste your contacts into the "check-
 - Enter to the project directory
 - Run `npm install`
 - Run `node app.js`
+- Input list number (country code without +) sample for my country 628XXXXXXXXXX
 - Wait
 - Scan the QR Code 
 - Done the results will be shown !!
