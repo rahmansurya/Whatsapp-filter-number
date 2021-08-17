@@ -1,0 +1,24 @@
+{
+   "name": "whatsapp-filter-number",
+   "version": "1.0.0",
+   "description": "Check whether a number has a Whatsapp account or not ",
+   "main": "app.js",
+   "scripts": {
+     "start": "node app.js",
+     "start:dev": "nodemon app.js",
+     "test": "echo \"Error: no test specified\" && exit 1"
+   },
+   "keywords": [
+     "whatsapp-api",
+     "node.js"
+   ],
+   "author": "Rahman Surya Praja",
+   "license": "MIT",
+   "dependencies": {
+     "@adiwajshing/baileys": "^3.5.2",
+     "chalk": "^4.1.2"
+   },
+   "devDependencies": {
+     "nodemon": "^2.0.12"
+   }
+ }
