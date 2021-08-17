@@ -8,7 +8,7 @@ class App {
       this.client = new WAConnection()
       this.client.autoReconnect = ReconnectMode.onAllErrors
       this.client.connectOptions.maxRetries = Infinity
-      this.client.connectOptions.timeoutMs = 30 * 2000
+      this.client.connectOptions.timeoutMs = 30 * 5000
    }
 
    async listen() {
@@ -27,7 +27,8 @@ class App {
               
        }
       var YourNumber = this.client.user.jid.substring(0, this.client.user.jid.lastIndexOf("@"));
-      var filesTxt = "nomor.txt";          
+      var filesTxt = "nomor.txt";      
+      var delayCheck = "100";  // Menghindari banned , Phone Number delay checker 
    
       console.log(`${chalk.green("✓")} Whatsapp Connection is Open`)
       console.log(`${chalk.green("✓")} Ready - using Account Name: ${this.client.user.name}`)
@@ -45,7 +46,7 @@ class App {
                   const result = await this.client.isOnWhatsApp(contactId)             
                   result ? console.log(chalk.blue.bold(number.trim(),'|AKTIF')) : console.log(chalk.red.bold(number.trim(),'|NON-WA'))
                resolve()
-             }, i * 5000)
+             }, i * delayCheck)
            }
          } 
        )))
