@@ -1,4 +1,4 @@
 node_modules/
 session.json
-.auth_info.json
+.auth_info_session.json
 package-lock.json
