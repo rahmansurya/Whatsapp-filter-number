@@ -13,11 +13,11 @@ You just need to enter your phone number or paste your contacts into the "check-
 - Enter to the project directory
 - Run `npm install`
 - Run `node app.js`
-- Don't forget Input list number (country code without +) on file "nomor.txt" 
-  example : 
-  6283XXXXXXXXX
-  6282XXXXXXXXX
-  6285XXXXXXXXX
+-   Don't forget Input list number (country code without +) on file "nomor.txt"     
+example : 
+6283XXXXXXXXX 
+6282XXXXXXXXX 
+6285XXXXXXXXX
 
 - Wait for connecting.. 
 - Scan the QR Code
