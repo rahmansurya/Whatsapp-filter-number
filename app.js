@@ -26,32 +26,40 @@ class App {
          fs.writeFileSync(authFile, JSON.stringify(authInfo, null, '\t')) // save this info to a file
               
        }
-      var YourNumber = this.client.user.jid.substring(0, this.client.user.jid.lastIndexOf("@"));
-      var filesTxt = "nomor.txt";      
-      var delayCheck = "100";  // Menghindari banned , Phone Number delay checker 
-   
-      console.log(`${chalk.green("✓")} Whatsapp Connection is Open`)
-      console.log(`${chalk.green("✓")} Ready - using Account Name: ${this.client.user.name}`)
-      console.log(`${chalk.green("✓")} Ready - using Number of: `, YourNumber)
-
-      const numberRaw =  fs.readFileSync(filesTxt, 'utf8')	
-      const numberlist = numberRaw.replace(/\r/g, " ").replace(/\//g, "").replace(/\n/g, "").replace(/^\s*/, '').split(" ")
-      console.log(`[${chalk.yellow('Work')}] Nomor Wa yang di cek ada ${numberlist.length} nomor...`)      
-      
-      await Promise.all(
-         numberlist.map((number, i) => new Promise((resolve, reject) => {
-           if (!isNaN(number) || number == '') {
-             setTimeout(async () => {
-                  const contactId = number.includes('@s.whatsapp.net') ? number.trim() : number.trim() + '@s.whatsapp.net'
-                  const result = await this.client.isOnWhatsApp(contactId)             
-                  result ? console.log(chalk.blue.bold(number.trim(),'|AKTIF')) : console.log(chalk.red.bold(number.trim(),'|NON-WA'))
-               resolve()
-             }, i * delayCheck)
-           }
-         } 
-       )))
-    console.log("Wassalam...");
-    process.exit()
+       var YourNumber = this.client.user.jid.substring(0, this.client.user.jid.lastIndexOf("@"));
+       var filesTxt = "nomor.txt";   
+        
+       console.log(`${chalk.green("✓")} Whatsapp Connection is Open`)
+       console.log(`${chalk.green("✓")} Ready - using Account Name: ${this.client.user.name}`)
+       console.log(`${chalk.green("✓")} Ready - using Number of: `, YourNumber)
+     
+       //console.log(countryCodes["ID"].name);
+     
+       const numberRaw =  fs.readFileSync(filesTxt, 'utf8')	
+         const numberlist = numberRaw.replace(/\r/g, " ").replace(/\//g, "").replace(/\n/g, "").replace(/^\s*/, '').split(" ")
+         console.log(`[${chalk.yellow('Work')}] Nomor Wa yang di cek ada ${numberlist.length} nomor...`)
+     
+           //let validNumber = []
+           await Promise.all(
+             numberlist.map((number, i) => new Promise((resolve, reject) => {
+               if (!isNaN(number) || number == '') {
+                 setTimeout(async () => {
+     
+             
+                   const contactId = number.includes('@s.whatsapp.net') ? number.replace(/^\s*/, '') : number.replace(/^\s*/, '') + '@s.whatsapp.net'
+                   const result = await this.client.isOnWhatsApp(contactId)    
+           //	result ? console.log(chalk.blue.bold(`Nomor:`,number,`|  Hasil: Aktif`)) : console.log(chalk.bgRed(`Nomor:`, number, '| Hasil: Non Aktif '))
+           //	update hanya nohp dan status
+             result ? console.log(chalk.blue.bold(number.trim(),'|AKTIF')) : console.log(chalk.bgRed(number.trim(),'|NON-WA'))
+             //validNumber.push({number, value: number})
+                   resolve()
+                 }, i * 1000)
+               }
+             }
+     
+         )))
+       console.log("Bye...");
+       process.exit();
    }
 }
 const server = new App();
