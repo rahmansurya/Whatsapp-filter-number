@@ -42,19 +42,12 @@ class App {
            //let validNumber = []
            await Promise.all(
              numberlist.map((number, i) => new Promise((resolve, reject) => {
-               if (!isNaN(number) || number == '') {
                  setTimeout(async () => {
-     
-             
                    const contactId = number.includes('@s.whatsapp.net') ? number.replace(/^\s*/, '') : number.replace(/^\s*/, '') + '@s.whatsapp.net'
                    const result = await this.client.isOnWhatsApp(contactId)    
-           //	result ? console.log(chalk.blue.bold(`Nomor:`,number,`|  Hasil: Aktif`)) : console.log(chalk.bgRed(`Nomor:`, number, '| Hasil: Non Aktif '))
-           //	update hanya nohp dan status
-             result ? console.log(chalk.blue.bold(number.trim(),'|AKTIF')) : console.log(chalk.bgRed(number.trim(),'|NON-WA'))
-             //validNumber.push({number, value: number})
+                   result ? console.log(chalk.blue.bold(number.trim(),'|AKTIF')) : console.log(chalk.bgRed(number.trim(),'|NON-WA'))
                    resolve()
-                 }, i * 1000)
-               }
+                 }, i * 1000)          
              }
      
          )))
