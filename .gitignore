@@ -4,3 +4,4 @@ session.json
 package-lock.json
 /checked/*.xlsx
 /xlsx/*.xlsx
+/dist
