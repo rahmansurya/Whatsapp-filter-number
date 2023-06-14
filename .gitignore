@@ -5,3 +5,4 @@ package-lock.json
 /checked/*.xlsx
 /xlsx/*.xlsx
 /dist
+/auth_info_baileys
