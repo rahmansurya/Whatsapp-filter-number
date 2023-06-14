@@ -42,9 +42,19 @@ class App {
     );
     console.log(`${chalk.green("✓")} Ready - using Number of: `, YourNumber);
 
-    const workbook = XLSX.readFile(fileXlsx);
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: "B" });
+    const files = fs.readdirSync(xlsxPath);
+
+    const jsonData = [];
+    
+    files.forEach(file => {
+      const filePath = path.join(xlsxPath, file);
+      if (file.endsWith('.xlsx')) {
+        const workbook = XLSX.readFile(filePath);
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: "B" });
+        jsonData.push(...sheetData);
+      }
+    });
 
     console.log(
       `[${chalk.yellow("Work")}] Number of WhatsApp contacts to check: ${
