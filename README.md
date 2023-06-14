@@ -11,17 +11,14 @@ You just need to enter your phone number or paste your contacts into the "check-
 **01. How to use ?**
 - Clone or download this repo
 - Enter to the project directory
-- Run `npm install`
-- Run `node app.js`
--   Don't forget Input list number (country code without +) on file "nomor.txt"     
-example : 
-6283XXXXXXXXX 
-6282XXXXXXXXX 
-6285XXXXXXXXX
+- Run `pnpm install`
+- Run `pnpm run build`
+- Run `pnpm run dev`
+-   Don't forget Input list number (country code without +) on file "/dist/xlsx"     
 
 - Wait for connecting.. 
 - Scan the QR Code
-- Done the results will be shown !!
+- Done the results will be generated in new modified directory (/dist/checked) !!
 
 
 
