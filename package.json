@@ -2,9 +2,9 @@
   "name": "whatsapp-filter-number",
   "version": "1.0.0",
   "description": "Check whether a number has a Whatsapp account or not ",
-  "main": "app.js",
+  "main": "dist/app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node dist/app.js",
     "build": "tsc -w",
     "dev": "nodemon dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,13 +13,15 @@
     "whatsapp-api",
     "node.js"
   ],
-  "author": "Rahman Surya Praja",
+  "author": "OSint",
   "license": "MIT",
   "dependencies": {
     "@adiwajshing/baileys": "^5.0.0",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@whiskeysockets/baileys": "github:WhiskeySockets/Baileys",
     "chalk": "^4.1.2",
+    "dotenv": "^16.3.1",
+    "mongoose": "^7.3.1",
     "qrcode-terminal": "^0.12.0",
     "xlsx": "^0.18.5"
   },
