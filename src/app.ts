@@ -13,34 +13,40 @@ import {
   Cliente as ClienteType,
   Province as ProvinceType,
 } from "./types/types";
-import { ObjectId, Types } from "mongoose";
+import { Types } from "mongoose";
 
 const xlsxPath = path.join(__dirname, "xlsx");
 
-async function listen(client: any) {
+async function listen(client: any, cliente: string) {
   console.log("Cliente autenticado");
-  await Provincia.deleteMany();
-  await NumberModel.deleteMany();
-  console.log('db borrada pa');
-  if (!(await Client.findOne({ nombre: "NM" }))) {
-    await Client.create({ nombre: "NM" });
+  let foundCliente = await Client.findOne({ nombre: cliente });
+  
+  if (!foundCliente) {
+    foundCliente = await Client.create({ nombre: cliente });
   }
-  if (!(await Client.findOne({ nombre: "FSL" }))) {
-    await Client.create({ nombre: "FSL" });
-  }
+  const provincias = await Provincia.find({
+    _id: { $in: foundCliente.provincias },
+  });
+  const provinciasIdsArray = provincias.map((provincia) => provincia._id);
+  console.log(provinciasIdsArray);
+  await NumberModel.deleteMany({ provincia: { $in: provinciasIdsArray } });
+  await Provincia.deleteMany({ cliente: foundCliente._id });
+  foundCliente.provincias = [];
+  await foundCliente.save();
+  console.log("db borrada pa");
   const files = await fs.readdir(xlsxPath);
   for (const file of files) {
     const filePath = path.join(xlsxPath, file);
     if (file.endsWith(".xlsx")) {
       console.log(file);
-      await processFile(filePath, client, "NM", file);
+      await processFile(filePath, client, cliente);
     }
   }
   console.log("Bye...");
   process.exit();
 }
 
-async function processFile(filePath: string, client: any, nombre: string, file: string) {
+async function processFile(filePath: string, client: any, nombre: string) {
   const workbook = XLSX.readFile(filePath);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
@@ -61,12 +67,13 @@ async function processFile(filePath: string, client: any, nombre: string, file: 
   );
   if (!foundProvince) {
     const content = await fs.readFile(
-      path.join(__dirname, "/text", provinceName),
+      path.join(__dirname, "/text", provinceName + '.txt'),
       "utf-8"
     );
     foundProvince = new Provincia({
       name: provinceName,
-      content
+      message: content,
+      cliente
     });
     foundProvince = await foundProvince.save();
     cliente.provincias.push(foundProvince._id);
@@ -154,7 +161,7 @@ async function connectToWhatsApp() {
       }
     } else if (connection === "open") {
       console.log("opened connection");
-      listen(sock);
+      listen(sock, 'NM');
     }
   });
 }
