@@ -2,3 +2,7 @@ node_modules/
 session.json
 .auth_info_session.json
 package-lock.json
+/checked/*.xlsx
+/xlsx/*.xlsx
+/dist
+/auth_info_baileys
