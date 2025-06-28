@@ -1,6 +1,7 @@
 # whatsapp filter number
 
-> This is the implementation example of [https://github.com/adiwajshing/Baileys](https://github.com/adiwajshing/Baileys)
+> This is the implementation example of [https://github.com/adiwajshing/Baileys](https://github.com/adiwajshing/Baileys) [depcreated]
+> change to https://github.com/WhiskeySockets/Baileys
 
 **00. Intro**
 Whatsapp number filter tool comes in handy to check if a particular phone number is on WhatsApp or not.
