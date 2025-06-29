@@ -16,23 +16,15 @@ class App {
 
    async listen() {
       try {
-         // Initialize WhatsApp Web client with local authentication
+         // Initialize WhatsApp Web client without Puppeteer/Chromium
          this.client = new Client({
             authStrategy: new LocalAuth({
                clientId: "whatsapp-checker"
             }),
-            puppeteer: {
-               headless: true,
-               args: [
-                  '--no-sandbox',
-                  '--disable-setuid-sandbox',
-                  '--disable-dev-shm-usage',
-                  '--disable-accelerated-2d-canvas',
-                  '--no-first-run',
-                  '--no-zygote',
-                  '--single-process',
-                  '--disable-gpu'
-               ]
+            // Remove puppeteer configuration to avoid Chromium dependency
+            webVersionCache: {
+               type: 'remote',
+               remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
             }
          });
 
