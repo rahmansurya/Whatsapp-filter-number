@@ -1,61 +1,70 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys')
-const { Boom } = require('@hapi/boom')
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
 const chalk = require("chalk");
 const fs = require("fs");
-const qrcode = require('qrcode-terminal');
 
 class App {
    constructor() {
-      this.sock = null;
+      this.client = null;
    }
 
    async listen() {
       try {
-         // Use multi-file auth state
-         const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys')
-         
-         this.sock = makeWASocket({
-            auth: state,
-            printQRInTerminal: true,
-            connectTimeoutMs: 60000,
-            defaultQueryTimeoutMs: 0,
-            keepAliveIntervalMs: 10000,
-            emitOwnEvents: true,
-            fireInitQueries: true,
-            generateHighQualityLinkPreview: true,
-            syncFullHistory: false,
-            markOnlineOnConnect: true,
-         })
-
-         this.sock.ev.on('connection.update', async (update) => {
-            const { connection, lastDisconnect, qr } = update
-            
-            if (qr) {
-               console.log('QR Code generated, scan it with your phone')
-               qrcode.generate(qr, { small: true })
+         // Initialize WhatsApp Web client with local authentication
+         this.client = new Client({
+            authStrategy: new LocalAuth({
+               clientId: "whatsapp-checker"
+            }),
+            puppeteer: {
+               headless: true,
+               args: [
+                  '--no-sandbox',
+                  '--disable-setuid-sandbox',
+                  '--disable-dev-shm-usage',
+                  '--disable-accelerated-2d-canvas',
+                  '--no-first-run',
+                  '--no-zygote',
+                  '--single-process',
+                  '--disable-gpu'
+               ]
             }
-            
-            if (connection === 'close') {
-               const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
-               console.log('Connection closed due to ', lastDisconnect?.error, ', reconnecting ', shouldReconnect)
-               
-               if (shouldReconnect) {
-                  this.listen()
-               }
-            } else if (connection === 'open') {
-               console.log(`${chalk.green("✓")} WhatsApp Connection is Open`)
-               console.log(`${chalk.green("✓")} Ready - using Account Name: ${this.sock.user?.name || 'Unknown'}`)
-               console.log(`${chalk.green("✓")} Ready - using Number: ${this.sock.user?.id?.split(':')[0] || 'Unknown'}`)
-               
-               // Start checking numbers after connection is established
-               await this.checkNumbers()
-            }
-         })
+         });
 
-         this.sock.ev.on('creds.update', saveCreds)
+         // Event listeners
+         this.client.on('qr', (qr) => {
+            console.log('QR Code generated, scan it with your phone');
+            qrcode.generate(qr, { small: true });
+         });
+
+         this.client.on('ready', async () => {
+            console.log(`${chalk.green("✓")} WhatsApp Web Client is ready!`);
+            
+            // Get client info
+            const clientInfo = this.client.info;
+            console.log(`${chalk.green("✓")} Ready - using Account Name: ${clientInfo.pushname || 'Unknown'}`);
+            console.log(`${chalk.green("✓")} Ready - using Number: ${clientInfo.wid.user || 'Unknown'}`);
+            
+            // Start checking numbers after client is ready
+            await this.checkNumbers();
+         });
+
+         this.client.on('authenticated', () => {
+            console.log(`${chalk.green("✓")} WhatsApp Web Client authenticated`);
+         });
+
+         this.client.on('auth_failure', (msg) => {
+            console.error(`${chalk.red("✗")} Authentication failed:`, msg);
+         });
+
+         this.client.on('disconnected', (reason) => {
+            console.log(`${chalk.yellow("!")} WhatsApp Web Client disconnected:`, reason);
+         });
+
+         // Initialize the client
+         await this.client.initialize();
 
       } catch (error) {
-         console.error('Error in listen:', error)
+         console.error('Error in listen:', error);
       }
    }
 
@@ -64,48 +73,67 @@ class App {
          const filesTxt = "nomor.txt";
          
          if (!fs.existsSync(filesTxt)) {
-            console.log(`${chalk.red("✗")} File ${filesTxt} not found!`)
-            process.exit(1)
+            console.log(`${chalk.red("✗")} File ${filesTxt} not found!`);
+            process.exit(1);
          }
 
-         const numberRaw = fs.readFileSync(filesTxt, 'utf8')	
-         const numberlist = numberRaw.replace(/\r/g, " ").replace(/\//g, "").replace(/\n/g, "").replace(/^\s*/, '').split(" ").filter(num => num.trim() !== '')
+         const numberRaw = fs.readFileSync(filesTxt, 'utf8');	
+         const numberlist = numberRaw.replace(/\r/g, " ").replace(/\//g, "").replace(/\n/g, "").replace(/^\s*/, '').split(" ").filter(num => num.trim() !== '');
          
-         console.log(`[${chalk.yellow('Work')}] Nomor WA yang di cek ada ${numberlist.length} nomor...`)
+         console.log(`[${chalk.yellow('Work')}] Nomor WA yang di cek ada ${numberlist.length} nomor...`);
 
          // Check numbers with delay to avoid rate limiting
          for (let i = 0; i < numberlist.length; i++) {
-            const number = numberlist[i].trim()
+            const number = numberlist[i].trim();
             if (number) {
                try {
-                  // Format number properly
-                  const contactId = number.includes('@s.whatsapp.net') ? number : number + '@s.whatsapp.net'
+                  // Format number properly for whatsapp-web.js
+                  let formattedNumber = number;
                   
-                  // Use onWhatsApp method from new Baileys
-                  const [result] = await this.sock.onWhatsApp(contactId)
+                  // Remove any existing country code formatting
+                  formattedNumber = formattedNumber.replace(/^\+/, '');
                   
-                  if (result && result.exists) {
-                     console.log(chalk.blue.bold(number, '|AKTIF'))
+                  // Add country code if not present (assuming Indonesian numbers)
+                  if (!formattedNumber.startsWith('62')) {
+                     if (formattedNumber.startsWith('0')) {
+                        formattedNumber = '62' + formattedNumber.substring(1);
+                     } else {
+                        formattedNumber = '62' + formattedNumber;
+                     }
+                  }
+                  
+                  // Format for WhatsApp Web (add @c.us)
+                  const formattedTarget = formattedNumber + '@c.us';
+                  
+                  // Check if number is registered on WhatsApp
+                  const isRegistered = await this.client.isRegisteredUser(formattedTarget);
+                  
+                  if (isRegistered) {
+                     console.log(chalk.blue.bold(number, '|AKTIF'));
                   } else {
-                     console.log(chalk.bgRed(number, '|NON-WA'))
+                     console.log(chalk.bgRed(number, '|NON-WA'));
                   }
                } catch (error) {
-                  console.log(chalk.red(number, '|ERROR:', error.message))
+                  console.log(chalk.red(number, '|ERROR:', error.message));
                }
                
                // Add delay between requests to avoid rate limiting
                if (i < numberlist.length - 1) {
-                  await new Promise(resolve => setTimeout(resolve, 2000))
+                  await new Promise(resolve => setTimeout(resolve, 3000)); // Increased delay for stability
                }
             }
          }
 
          console.log("Checking completed. Bye...");
+         
+         // Destroy the client and exit
+         await this.client.destroy();
          process.exit(0);
 
       } catch (error) {
-         console.error('Error in checkNumbers:', error)
-         process.exit(1)
+         console.error('Error in checkNumbers:', error);
+         await this.client.destroy();
+         process.exit(1);
       }
    }
 }
