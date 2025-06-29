@@ -9,9 +9,50 @@ const helmet = require('helmet');
 const qrcode = require('qrcode-terminal');
 const chalk = require("chalk");
 
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+const PORT = process.env.PORT || 3000;
+
 class App {
    constructor() {
       this.client = null;
+      this.setupExpress();
+   }
+
+   setupExpress() {
+      // Security middleware
+      app.use(helmet());
+      
+      // Session middleware
+      app.use(session({
+         secret: 'whatsapp-checker-secret',
+         resave: false,
+         saveUninitialized: true,
+         cookie: { secure: false }
+      }));
+
+      // Parse JSON bodies
+      app.use(express.json());
+      app.use(express.urlencoded({ extended: true }));
+
+      // Serve static files
+      app.use(express.static(path.join(__dirname, 'public')));
+
+      // Routes
+      app.get('/', (req, res) => {
+         res.send('WhatsApp Number Checker is running!');
+      });
+
+      // Socket.IO connection handling
+      io.on('connection', (socket) => {
+         console.log('A user connected');
+         
+         socket.on('disconnect', () => {
+            console.log('User disconnected');
+         });
+      });
    }
 
    async listen() {
@@ -134,7 +175,14 @@ class App {
          process.exit(1);
       }
    }
+
+   startServer() {
+      server.listen(PORT, () => {
+         console.log(`${chalk.green("✓")} Express server running on port ${PORT}`);
+         this.listen(); // Start WhatsApp client after server starts
+      });
+   }
 }
 
-const server = new App();
-server.listen();
+const whatsappApp = new App();
+whatsappApp.startServer();
